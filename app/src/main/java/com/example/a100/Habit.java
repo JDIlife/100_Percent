@@ -7,6 +7,7 @@ public class Habit {
     private long createdDate;
     private int didDays;
     private String count;
+    private String checkedDate;
 
     public Habit(String habitName, String duration, boolean startsTomorrow, long createdDate, String count){
         this.habitName = habitName;
@@ -14,7 +15,12 @@ public class Habit {
         this.startsTomorrw = startsTomorrw;
         this.createdDate = createdDate;
         this.didDays = 0;
-        this.count = count;
+        if(count.equals("")){ // 사용자가 횟수를 따로 입력하지 않으면 기본으로 횟수를 1로 설정한다
+            this.count = "1";
+        }else{
+            this.count = count;
+        }
+        this.checkedDate = ""; // currentDate.getCheckedDate(); 로 값을 불렀을 때 초기값이 없어서 오류가나는 것을 방지
     }
 
     public String getName(){
@@ -43,5 +49,13 @@ public class Habit {
 
     public void setDidDays(){
         this.didDays++;
+    }
+
+    public String getCheckedDate(){
+        return checkedDate;
+    }
+
+    public void setCreatedDate(String checkedDate){
+        this.checkedDate = checkedDate;
     }
 }

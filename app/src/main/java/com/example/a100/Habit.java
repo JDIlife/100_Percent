@@ -8,6 +8,7 @@ public class Habit {
     private int didDays;
     private String count;
     private String checkedDate;
+    private int doCount;
 
     public Habit(String habitName, String duration, boolean startsTomorrow, long createdDate, String count){
         this.habitName = habitName;
@@ -57,5 +58,17 @@ public class Habit {
 
     public void setCreatedDate(String checkedDate){
         this.checkedDate = checkedDate;
+    }
+
+    public int getDoCount(){
+        return doCount;
+    }
+
+    public void setDoCount(){
+        this.doCount++;
+    }
+
+    public void setDoCountZero(){
+        this.doCount = 0;
     }
 }

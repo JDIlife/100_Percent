@@ -49,19 +49,26 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         SimpleDateFormat todayDateFormat = new SimpleDateFormat("yyyyMMdd");
         String todayDate = todayDateFormat.format(today.getTime());
 
+        // ========== 모든 UI 요소들을 지정한다 ==============//
         TextView nameTextView = listItemView.findViewById(R.id.habit_name);
-        if(currentHabit.getCount().equals("1")){
+        Button chkBtn = listItemView.findViewById(R.id.check_btn);
+        TextView durationTextView = listItemView.findViewById(R.id.circle_duration);
+        TextView circlePassedDate = listItemView.findViewById(R.id.circle_passed_date);
+        TextView progressTextView = listItemView.findViewById(R.id.habit_progress);
+
+
+        // ============ 습관 제목, 횟수 설정 부분 ============== //
+        if(currentHabit.getCount().equals("1")){ // 횟수가 기본값인 1로 설정되어있으면 그냥 습관제목만 보여준다
             nameTextView.setText(currentHabit.getName());
         } else if(!(currentHabit.getCheckedDate().equals(todayDate))){ // 습관을 마지막으로 체크한 날짜와 어플을 켰을 때 날짜가 다르면 0으로 초기화
             nameTextView.setText(currentHabit.getName() + "    " + "0/" + currentHabit.getCount());
         }
 
-
-        TextView durationTextView = listItemView.findViewById(R.id.circle_duration);
+        // 원부분 습관 총 기간 표시
         durationTextView.setText(String.valueOf(currentHabit.getDuration()));
 
-        TextView circlePassedDate = listItemView.findViewById(R.id.circle_passed_date);
 
+        // 원 부분 습관 지나간 기간 표시
         // **습관 생성날짜와 조회날짜를 비교해서 습관을 생성하고 며칠이 지났는지 보여준다
             // 1.일자를 조회하는 오늘 날짜를 가져온다
         long nowDate = today.getTimeInMillis();
@@ -71,27 +78,20 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
             // 3.setText() 는 안의 숫자를 id값으로 인식하기 때문에 숫자를 그대로 넣으면 오류가 난다!!
         circlePassedDate.setText(String.valueOf(passedDate));
 
-        TextView progressTextView = listItemView.findViewById(R.id.habit_progress);
 
+
+        // 습관 진행 바 내용
         // 처음 습관을 만들었을 때 기본값을 보여준다
         int didDays = currentHabit.getDidDays();
         progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    0%");
 
+
         // check Button click event
-        Button chkBtn = listItemView.findViewById(R.id.check_btn);
         chkBtn.setOnClickListener(new View.OnClickListener(){
-            int doCount = 0;
+            int doCount = currentHabit.getDoCount();
+            int totalCount = Integer.valueOf(currentHabit.getCount());
+
             public void onClick(View v){
-                // 체크버튼이 눌릴 때마다 setDidDays()로 didDays를 늘린 이후에 getDidDays()로 증가된 값을 가져와서 보여준다
-                //currentHabit.setDidDays();
-                int didDays = currentHabit.getDidDays();
-                // 바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
-                if(didDays != 0 && passedDate != 0){
-                    int doPercent = (int) (didDays / passedDate) * 100;
-                    progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    "  +"%");
-                } else {
-                    progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
-                }
 
                 // ** 체크버튼을 클릭한 날짜를 기록함
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
@@ -99,14 +99,25 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
                 String checkedDate = dateFormat.format(checkedMoment.getTime());
                 currentHabit.setCreatedDate(checkedDate);
 
-                if(doCount < Integer.valueOf(currentHabit.getCount())){
-                    ++doCount;
+                // 습관의 횟수보다 적을 때만 버튼을 클릭하면 doCount 증가, 습관 횟수를 모두 채웠으면 chkBtn 비활성화
+                if(doCount < (Integer.valueOf(currentHabit.getCount()) - 1)){
+                    currentHabit.setDoCount();
+                    doCount = currentHabit.getDoCount();
                     nameTextView.setText(currentHabit.getName() + "    " + doCount + "/" + currentHabit.getCount());
-                } else if(doCount == Integer.valueOf(currentHabit.getCount())){
+                } else if(doCount == (Integer.valueOf(currentHabit.getCount())) - 1){
+                    currentHabit.setDoCount();
+                    doCount = currentHabit.getDoCount();
+                    nameTextView.setText(currentHabit.getName() + "    " + doCount + "/" + currentHabit.getCount());
                     currentHabit.setDidDays();
-                    chkBtn.setEnabled(false);
-                    int didDays2 = currentHabit.getDidDays();
-                    progressTextView.setText(passedDate + "일 중 " + didDays2 + "일 달성" + "    100%");
+
+                    int didDays = currentHabit.getDidDays();
+                    // 바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
+                    if(didDays != 0 && passedDate != 0){
+                        int doPercent = (int) (didDays / passedDate) * 100;
+                        progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    "  +"%");
+                    } else {
+                        progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
+                    }   chkBtn.setEnabled(false);
                 }
             }
         });

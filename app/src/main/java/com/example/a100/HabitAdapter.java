@@ -44,10 +44,7 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
 
         Habit currentHabit = getItem(position);
 
-        //---------- 실제로 listview 에 listitem 을 그려주는 부분 -----------------//
-        GregorianCalendar today = new GregorianCalendar();
-        SimpleDateFormat todayDateFormat = new SimpleDateFormat("yyyyMMdd");
-        String todayDate = todayDateFormat.format(today.getTime());
+        // >>>>>>>>>>>>>>>>>>>---------- 실제로 listview 에 listitem 을 그려주는 부분 -----------------<<<<<<<<<<<<<<<<< //
 
         // ========== 모든 UI 요소들을 지정한다 ==============//
         TextView nameTextView = listItemView.findViewById(R.id.habit_name);
@@ -56,12 +53,16 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         TextView circlePassedDate = listItemView.findViewById(R.id.circle_passed_date);
         TextView progressTextView = listItemView.findViewById(R.id.habit_progress);
 
+        // 기존에 저장된 습관생성날짜와 현재의 날짜 비교용
+        GregorianCalendar today = new GregorianCalendar();
+        SimpleDateFormat todayDateFormat = new SimpleDateFormat("yyyyMMdd");
+        String todayDate = todayDateFormat.format(today.getTime());
 
         // ============ 습관 제목, 횟수 설정 부분 ============== //
         if(currentHabit.getCount().equals("1")){ // 횟수가 기본값인 1로 설정되어있으면 그냥 습관제목만 보여준다
-            nameTextView.setText(currentHabit.getName());
+            nameTextView.setText(currentHabit.getHabitName());
         } else if(!(currentHabit.getCheckedDate().equals(todayDate))){ // 습관을 마지막으로 체크한 날짜와 어플을 켰을 때 날짜가 다르면 0으로 초기화
-            nameTextView.setText(currentHabit.getName() + "    " + "0/" + currentHabit.getCount());
+            nameTextView.setText(currentHabit.getHabitName() + "    " + "0/" + currentHabit.getCount());
         }
 
         // 원부분 습관 총 기간 표시
@@ -73,8 +74,9 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
             // 1.일자를 조회하는 오늘 날짜를 가져온다
         long nowDate = today.getTimeInMillis();
             // 2.처음 습관을 생성했던 날짜와 차이를 계산해서 지나간 날짜를 얻는다
-        long diffSec = (currentHabit.getCreatedDate() - nowDate) / 1000;
-        long passedDate = diffSec / (24*60*60);
+        long diffSec = (nowDate - currentHabit.getCreatedDate()) / 1000;
+        //long passedDate = diffSec / (24*60*60);
+        long passedDate = diffSec;
             // 3.setText() 는 안의 숫자를 id값으로 인식하기 때문에 숫자를 그대로 넣으면 오류가 난다!!
         circlePassedDate.setText(String.valueOf(passedDate));
 
@@ -83,7 +85,8 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         // 습관 진행 바 내용
         // 처음 습관을 만들었을 때 기본값을 보여준다
         int didDays = currentHabit.getDidDays();
-        progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    0%");
+        //progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    0%"); // => 이 줄이 새로 습관을 생성하면 기존의 습관 진행도를 0으로 만든다
+        // 그렇다고 위의 줄을 적지 않으면 처음 습관을 생성할 때 진행바에 아무 내용도 없다.
 
 
         // check Button click event
@@ -97,36 +100,44 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 GregorianCalendar checkedMoment = new GregorianCalendar();
                 String checkedDate = dateFormat.format(checkedMoment.getTime());
-                currentHabit.setCreatedDate(checkedDate);
+                currentHabit.setCreatedDate(Long.parseLong(checkedDate));
 
                 // 습관의 횟수보다 적을 때만 버튼을 클릭하면 doCount 증가, 습관 횟수를 모두 채웠으면 chkBtn 비활성화
                 if(doCount < (Integer.valueOf(currentHabit.getCount()) - 1)){
-                    currentHabit.setDoCount();
+                    currentHabit.setDoCount(1);
                     doCount = currentHabit.getDoCount();
-                    nameTextView.setText(currentHabit.getName() + "    " + doCount + "/" + currentHabit.getCount());
+                    nameTextView.setText(currentHabit.getHabitName() + "    " + doCount + "/" + currentHabit.getCount());
                 } else if(doCount == (Integer.valueOf(currentHabit.getCount())) - 1){
-                    currentHabit.setDoCount();
+                    currentHabit.setDoCount(1);
                     doCount = currentHabit.getDoCount();
-                    nameTextView.setText(currentHabit.getName() + "    " + doCount + "/" + currentHabit.getCount());
-                    currentHabit.setDidDays();
+                    nameTextView.setText(currentHabit.getHabitName() + "    " + doCount + "/" + currentHabit.getCount());
+                    currentHabit.setDidDays(1);
+                    chkBtn.setEnabled(false);
 
                     int didDays = currentHabit.getDidDays();
                     // 바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
                     if(didDays != 0 && passedDate != 0){
-                        int doPercent = (int) (didDays / passedDate) * 100;
-                        progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    "  +"%");
+                        int doPercent = (int) ((didDays / (float)passedDate) * 100);
+                        progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성    " + doPercent +"%");
                     } else {
                         progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
-                    }   chkBtn.setEnabled(false);
+                    }
                 }
             }
         });
 
         return listItemView;
     }
+
 }
 
+// 문제: 습관 생성 -> 체크 -> doPercent 정상 계산 // 새로운 습관 생성 -> 기존의 doPercent 0이 되어버림
+
 /* 날짜 지남 알고리즘
+
+    !! getView() 의 호출시점이 listview에 요소가 추가되거나, 스크롤되거나 하는 상황이다. 그렇기 때문에 기존에 생각했던 아래의 알고리즘은 정상작동하지 않는다
+    !! 어플을 열자마자 비교할 수 없기 때문이다. { getView() 의 호출시점 특성상 }
+
     -- 굳이 매일 단위로 오늘에서 내일로 날짜가 지났음을 감지할 필요는 없다!!
     --> 그냥 오늘의 날짜와 다르기만 하면 되는 것!!
     => 어플을 열었을 때(기존에 저장한 날짜) 비교 (확인한 날짜) ==> 차이가 있다면 0으로 초기화

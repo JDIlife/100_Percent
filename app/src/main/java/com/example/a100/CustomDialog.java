@@ -33,7 +33,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
 
     // listener 인터페이스
     public interface OnSaveClickListener{
-        void onSaveClicked(String habitName, String duration, boolean startsToday, long createdDate, String count);
+        void onSaveClicked(Habit habit);
     }
 
     private OnSaveClickListener onSaveClickListener;
@@ -67,18 +67,22 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         switch (v.getId()){
             // Ok 버튼을 눌렀을 때 동작
             case R.id.save_btn:
-                // pull 방식으로 데이터를 가져옴
-                String habitName = habitNameEditText.getText().toString();
-                String duration = durationEditText.getText().toString();
-                boolean startsTomorrow = startsTodaySwitch.isChecked();
+
+                Habit habit = new Habit();
+
+                habit.setHabitName(habitNameEditText.getText().toString());
+                habit.setDuration(durationEditText.getText().toString());
+                habit.setStartsTomorrow(startsTodaySwitch.isChecked());
 
                 // 습관 생성일자를 가져옴 (습관을 시작하고 지나간 날짜를 계산하기 위해서)
                 Calendar habitCreatedDate = new GregorianCalendar();
                 long createdDate = habitCreatedDate.getTimeInMillis();
-                String count = countEditText.getText().toString();
+                habit.setCreatedDate(createdDate);
+
+                habit.setCount(countEditText.getText().toString());
 
                 // 리스너 인터페이스 함수 호출
-                onSaveClickListener.onSaveClicked(habitName, duration, startsTomorrow, createdDate, count);
+                onSaveClickListener.onSaveClicked(habit);
                 dismiss();
                 break;
 

@@ -1,13 +1,13 @@
 package com.example.a100;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +18,9 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
     private ListView habitListView;
     private List<Habit> habitList;
     private HabitAdapter habitAdapter;
+
+    private HabitDao mHabitDao;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +45,16 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
     }
 
     @Override
-    public void onSaveClicked(String habitName, String duration, boolean startsTomorrow, long createdDate, String count){
-        habitList.add(new Habit(habitName, duration, startsTomorrow, createdDate, count));
+    public void onSaveClicked(Habit habit){
+        HabitDatabase database = Room.databaseBuilder(getApplicationContext(), HabitDatabase.class, "hundred.db")
+                .fallbackToDestructiveMigration() // 데이터베이스 버전 변경 가능
+                .allowMainThreadQueries() // Main 쓰레드에서 DB에 입출력 가능하게 설정
+                .build();
+
+        mHabitDao = database.habitDao();
+
+        mHabitDao.setInsertHabit(habit); // => 여기서 어플이 강제로 종료되는 오류가 난다! (version 숫자를 2로 올려주니까 종료는 안된다!!)
+
         habitAdapter.notifyDataSetChanged();
     }
 

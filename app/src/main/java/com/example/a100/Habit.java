@@ -1,74 +1,93 @@
 package com.example.a100;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class Habit {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id = 0;
+
     private String habitName;
     private String duration;
-    private boolean startsTomorrw;
+    private boolean startsTomorrow;
     private long createdDate;
     private int didDays;
     private String count;
     private String checkedDate;
     private int doCount;
 
-    public Habit(String habitName, String duration, boolean startsTomorrow, long createdDate, String count){
-        this.habitName = habitName;
-        this.duration = duration;
-        this.startsTomorrw = startsTomorrw;
-        this.createdDate = createdDate;
-        this.didDays = 0;
-        if(count.equals("")){ // 사용자가 횟수를 따로 입력하지 않으면 기본으로 횟수를 1로 설정한다
-            this.count = "1";
-        }else{
-            this.count = count;
-        }
-        this.checkedDate = ""; // currentDate.getCheckedDate(); 로 값을 불렀을 때 초기값이 없어서 오류가나는 것을 방지
+    public int getId() {
+        return id;
     }
 
-    public String getName(){
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getHabitName() {
         return habitName;
     }
 
-    public String getDuration(){
+    public void setHabitName(String habitName) {
+        this.habitName = habitName;
+    }
+
+    public String getDuration() {
         return duration;
     }
 
-    public boolean getStartDate(){
-        return startsTomorrw;
+    public void setDuration(String duration) {
+        this.duration = duration;
     }
 
-    public long getCreatedDate(){
+    public boolean isStartsTomorrow() {
+        return startsTomorrow;
+    }
+
+    public void setStartsTomorrow(boolean startsTomorrow) {
+        this.startsTomorrow = startsTomorrow;
+    }
+
+    public long getCreatedDate() {
         return createdDate;
     }
 
-    public int getDidDays(){
+    public void setCreatedDate(long createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public int getDidDays() {
         return didDays;
     }
 
-    public String getCount(){
+    public void setDidDays(int didDays) {
+        this.didDays = didDays;
+    }
+
+    public String getCount() {
         return count;
     }
 
-    public void setDidDays(){
-        this.didDays++;
+    public void setCount(String count) {
+        this.count = count;
     }
 
-    public String getCheckedDate(){
+    public String getCheckedDate() {
         return checkedDate;
     }
 
-    public void setCreatedDate(String checkedDate){
+    public void setCheckedDate(String checkedDate) {
         this.checkedDate = checkedDate;
     }
 
-    public int getDoCount(){
+    public int getDoCount() {
         return doCount;
     }
 
-    public void setDoCount(){
-        this.doCount++;
+    public void setDoCount(int doCount) {
+        this.doCount = doCount;
     }
 
-    public void setDoCountZero(){
-        this.doCount = 0;
-    }
 }

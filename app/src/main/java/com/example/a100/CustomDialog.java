@@ -81,6 +81,11 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
 
                 habit.setCount(countEditText.getText().toString());
 
+                // ** 습관 생성일자를 포멧만 바꿔서 기본 체크일자로 저장 (어플 실행시 null 오류 방지)
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                String checkedDate = dateFormat.format(createdDate);
+                habit.setCheckedDate(checkedDate);
+
                 // 리스너 인터페이스 함수 호출
                 onSaveClickListener.onSaveClicked(habit);
                 dismiss();

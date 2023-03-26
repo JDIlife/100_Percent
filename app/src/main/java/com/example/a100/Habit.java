@@ -63,7 +63,7 @@ public class Habit {
     }
 
     public void setDidDays(int didDays) {
-        this.didDays = didDays;
+        this.didDays += didDays;
     }
 
     public String getCount() {
@@ -71,7 +71,11 @@ public class Habit {
     }
 
     public void setCount(String count) {
-        this.count = count;
+        if(count.equals("")){
+            this.count = "1";
+        } else {
+            this.count = count;
+        }
     }
 
     public String getCheckedDate() {
@@ -87,7 +91,11 @@ public class Habit {
     }
 
     public void setDoCount(int doCount) {
-        this.doCount = doCount;
+        this.doCount += doCount;
+    }
+
+    public void setDoCountZero(){
+        this.doCount = 0;
     }
 
 }

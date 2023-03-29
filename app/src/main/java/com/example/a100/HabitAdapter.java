@@ -92,7 +92,6 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         circlePassedDate.setText(String.valueOf(passedDate));
 
 
-
         // ======  습관 진행 바 내용
         // 처음 습관을 만들었을 때 기본값을 보여준다
         int didDays = currentHabit.getDidDays();
@@ -106,7 +105,6 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         } else {
             progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
         }
-
 
         // ===== 습관 체크버튼 활성화/비활성화 여부
         if((currentHabit.getDoCount() == Integer.valueOf(currentHabit.getCount())) && (currentHabit.getCheckedDate().equals(todayDate))){
@@ -163,12 +161,14 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
 
 /*
 
-** 습관을 처음 불러올 때 체크버튼 활성화/비활성화 여부
+** 해결해야하는 문제
 
-(doCount == count) && (checkedDate == todayDate) => 오늘 횟수도 다 채웠고, 마지막 체크가 오늘 당일이다(하루가 안지남) => 체크버튼 비활성화
+1. 습관추가를 하면 즉시 listview에 업데이트되지 않는 문제 (한번 리로드를 해줘야 view에 업데이트된다)
+=> HabitDatabase.java 에서 .allowMainThreadQuires(); 때문에 UI업데이트가 안되었던 것!!
 
-(doCount != count) && (checkedDate == todayDate) => 오늘 횟수 다 못채웠고, 마지막 체크가 당일이다 => 체크버튼 활성화
+2. passedDate가 1일인데, 핸드폰 날짜를 수동으로 조절한 다음 체크버튼을 누르면 2까지 올라감 (200%가 되버림)
+- 이 문제는 처음 습관을 만들었을 때 passedDate가 0으로 시작하는 문제 (startsTomorrow 의 여부에 따라서 조절해줘야됨)
+- startsTomorrow == true 라면 체크버튼도 내일까지는 비활성화 시켜줘야됨
 
-(doCount != count) && (checkedDate != todayDate) => 횟수 다 못채웠고, 하루가 지났다 => 체크버튼 활성화
 
  */

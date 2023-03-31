@@ -6,20 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.material.tabs.TabLayout;
-
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -38,6 +29,8 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         this.habitList = habitList;
     }
 
+
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
         View listItemView = convertView;
@@ -46,12 +39,25 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
                     R.layout.listview_item, parent, false);
         }
 
-        Habit currentHabit = getItem(position);
-
-        // Room 데이터베이스를 사용하기 위해 작성한다
+        // Room 데이터베이스 초기화
         mHabitDatabase = HabitDatabase.getInstance(context);
         mHabitDao = mHabitDatabase.habitDao();
 
+        Habit currentHabit = getItem(position);
+
+        // currentHabit 을 통해 Room 데이터베이스를 업데이트하는 스레드
+        class DBUpdateThread implements Runnable{
+
+            @Override
+            public void run(){
+                try {
+                    // db 접근
+                    mHabitDao.setUpdateHabit(currentHabit);
+                } catch (Exception e){
+                    // error Handling
+                }
+            }
+        }
         // >>>>>>>>>>>>>>>>>>>---------- 실제로 listview 에 listitem 을 그려주는 부분 -----------------<<<<<<<<<<<<<<<<< //
 
         // ========== 모든 UI 요소들을 지정한다 ==============//
@@ -74,7 +80,10 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         } else if(!(currentHabit.getCheckedDate().equals(todayDate))){ // 습관을 마지막으로 체크한 날짜와 어플을 켰을 때 날짜가 다르면 0으로 초기화
             nameTextView.setText(currentHabit.getHabitName() + "    " + "0/" + currentHabit.getCount());
             currentHabit.setDoCountZero();
-            mHabitDao.setUpdateHabit(currentHabit);
+
+            DBUpdateThread dbRunnable = new DBUpdateThread();
+            Thread t = new Thread(dbRunnable);
+            t.start();
         }
 
         // ====== 원부분 습관 총 기간 표시
@@ -95,8 +104,6 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         // ======  습관 진행 바 내용
         // 처음 습관을 만들었을 때 기본값을 보여준다
         int didDays = currentHabit.getDidDays();
-        //progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "%"); // => 이 줄이 새로 습관을 생성하면 기존의 습관 진행도를 0으로 만든다
-        // 그렇다고 위의 줄을 적지 않으면 처음 습관을 생성할 때 진행바에 아무 내용도 없다.
 
         // 바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
         if(didDays != 0 && passedDate != 0){
@@ -106,33 +113,29 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
             progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
         }
 
-        // ===== 습관 체크버튼 활성화/비활성화 여부
+        // ===== 습관 체크버튼 활성화/비활성화 여부 (횟수를 모두 채우고, 동일한 날짜라면 체크버튼 비활성화)
         if((currentHabit.getDoCount() == Integer.valueOf(currentHabit.getCount())) && (currentHabit.getCheckedDate().equals(todayDate))){
             chkBtn.setEnabled(false);
         }
 
-        // check Button click event
+        // 체크버튼 클릭 이벤트
         chkBtn.setOnClickListener(new View.OnClickListener(){
             int doCount = currentHabit.getDoCount();
             int totalCount = Integer.valueOf(currentHabit.getCount());
 
             public void onClick(View v){
-
                 // ** 체크버튼을 클릭한 날짜를 기록함
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 GregorianCalendar checkedMoment = new GregorianCalendar();
                 String checkedDate = dateFormat.format(checkedMoment.getTime());
                 currentHabit.setCheckedDate(checkedDate);
 
-                mHabitDao.setUpdateHabit(currentHabit);
-
-//                 습관의 횟수보다 적을 때만 버튼을 클릭하면 doCount 증가, 습관 횟수를 모두 채웠으면 chkBtn 비활성화
+                //습관의 횟수보다 적을 때만 버튼을 클릭하면 doCount 증가, 습관 횟수를 모두 채웠으면 chkBtn 비활성화
                 if(doCount < (totalCount - 1)){
                     currentHabit.setDoCount(1);
-                    doCount = currentHabit.getDoCount();
+                    doCount = currentHabit.getDoCount(); // doCount 증가
                     nameTextView.setText(currentHabit.getHabitName() + "    " + doCount + "/" + totalCount);
 
-                    mHabitDao.setUpdateHabit(currentHabit);
                 } else if(doCount == (totalCount - 1)){
                     currentHabit.setDoCount(1);
                     doCount = currentHabit.getDoCount();
@@ -140,9 +143,7 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
                     currentHabit.setDidDays(1);
                     chkBtn.setEnabled(false);
                     int didDays = currentHabit.getDidDays();
-
-                    mHabitDao.setUpdateHabit(currentHabit);
-                    // 바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
+                    //바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
                     if(didDays != 0 && passedDate != 0){
                         int doPercent = (int) ((didDays / (float)passedDate) * 100);
                         progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성    " + doPercent +"%");
@@ -150,12 +151,17 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
                         progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
                     }
                 }
+
+                // 별도의 쓰레드로 실행 (클릭의 결과로 생성된 currentHabit 을 업데이트한다)
+                DBUpdateThread dbRunnable = new DBUpdateThread();
+                Thread t = new Thread(dbRunnable);
+                t.start();
+
             }
         });
 
         return listItemView;
     }
-
 }
 
 
@@ -163,12 +169,22 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
 
 ** 해결해야하는 문제
 
-1. 습관추가를 하면 즉시 listview에 업데이트되지 않는 문제 (한번 리로드를 해줘야 view에 업데이트된다)
-=> HabitDatabase.java 에서 .allowMainThreadQuires(); 때문에 UI업데이트가 안되었던 것!!
+1. 체크버튼을 눌렀을 때 어플이 강제종료되는 문제: 쓰레드 사용해서 DB접근과 UI접근을 분리하여 해결해야함
+
+    처음 했던 생각: 버튼을 눌렀을 때 바로 currentHabit에 값을 적절히 할당하고, 마지막에 별도의 쓰레드를 사용해서 저장
+
+    수정한 생각: 체크버튼으로 클릭된 값은 사용자가 보고 있을 때만 유지되면 된다 (그러니까 굳이 사용자가 클릭할 때마다 db에 저장할 필요는 없다!)
+    => 즉 프로그램이 종료되기 전에만 최종 값을 저장하면 되는 것이다!! (사용자가 어플을 켜서 한 번 체크할 수도, 여러번 체크할 수도 있다. 어차피 필요한 건 마지막 데이터다!!)
+    ==> 프로그램이 종료되는 시점에 db를 저장하는 동작을 실행시킨다!!
+
+    ===> onPause(), onStop(), onDestroy(), 강제종료되는 경우
+    ==> onPause(), onStop()일 때 현재 상태 정보를 저장하는 것이 좋아보인다.
+
+    소문제1. HabitAdapter 에서 설정한 currentHabit을 어떻게 onPause()에 전달해서 db에 저장할 것인가 ==> 해결불가
+
 
 2. passedDate가 1일인데, 핸드폰 날짜를 수동으로 조절한 다음 체크버튼을 누르면 2까지 올라감 (200%가 되버림)
 - 이 문제는 처음 습관을 만들었을 때 passedDate가 0으로 시작하는 문제 (startsTomorrow 의 여부에 따라서 조절해줘야됨)
 - startsTomorrow == true 라면 체크버튼도 내일까지는 비활성화 시켜줘야됨
-
 
  */

@@ -2,11 +2,12 @@ package com.example.a100;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -33,9 +34,6 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
 
                 habitAdapter = new HabitAdapter(MainActivity.this, habitList);
                 habitListView.setAdapter(habitAdapter);
-
-//                habitAdapter.notifyDataSetChanged(); // 여기도 안적어줘도 된다??!! 이걸로 view를 업데이트 하는게 아닌가?
-                // 어차피 Adapter로 데이터 받았고, setAdapter로 연결했으니까 그냥 바로 보여주기만 하면 되는건가?
             } catch (Exception e){
                 // error Handling
             }
@@ -70,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
             }
         });
 
+
     }
 
     // 커스텀 다이얼로그의 save_btn 을 누르면 Room 에 입력받은 데이터를 저장한다
@@ -82,8 +81,6 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
             public void run() {
                 habitAdapter = new HabitAdapter(MainActivity.this, habitList);
                 habitListView.setAdapter(habitAdapter);
-                //habitAdapter.notifyDataSetChanged(); // 있어도 되고 없어도 정상동작?? 이 부분이 데이터가 바뀌었음을 감지하고 view를 다시 그리는 거아닌가?
-                // 그렇다면 이걸 안쓰면 비정상작동해야하는데, 안써도 멀쩡하다
             }
         };
 
@@ -104,4 +101,5 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
         t.start();
 
     }
+
 }

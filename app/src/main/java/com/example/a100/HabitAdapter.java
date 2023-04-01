@@ -165,3 +165,15 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         return listItemView;
     }
 }
+
+/*
+    해결해야하는 과제
+
+    1. listViewItem 클릭시 삭제가 가능한 습관 세부 항목으로 들어가야됨
+
+    2. MainActivithy 에서 항상 표시되는 "오늘도 화이팅!!" 문구를 날짜가 바뀔 때마다 새로운 동기부여 문구로 변경해야됨
+
+    3. UI 수정, 애니메이션 추가
+
+
+ */

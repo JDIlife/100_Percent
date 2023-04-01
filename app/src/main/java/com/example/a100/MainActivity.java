@@ -2,9 +2,11 @@ package com.example.a100;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -68,6 +70,18 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
             }
         });
 
+        // listview 의 아이템을 클릭하면 상세 화면으로 이동!
+        habitListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+                startActivity(intent);
+                Toast.makeText(getApplicationContext(), ""+id, Toast.LENGTH_SHORT).show(); // position을 통해 몇번째를 불렀는지 알 수 있다.
+
+                // 문제: chkBtn.setEnabled(false) 가 되어있지 않은 상태에서는 이 메서드를 실행할 수 없다!
+                // 체크버튼의 xml 요소에서 focusable=false 로 설정해서 해결!!
+            }
+        });
 
     }
 

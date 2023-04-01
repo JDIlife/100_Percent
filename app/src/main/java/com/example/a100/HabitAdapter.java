@@ -1,13 +1,11 @@
 package com.example.a100;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -28,8 +26,6 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         this.context = context;
         this.habitList = habitList;
     }
-
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
@@ -96,21 +92,25 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
             // 2.처음 습관을 생성했던 날짜와 차이를 계산해서 지나간 날짜를 얻는다
         long diffSec = (nowDate - currentHabit.getCreatedDate()) / 1000;
         long passedDate = diffSec / (24*60*60);
-//        long passedDate = diffSec;
-            // 3.setText() 는 안의 숫자를 id값으로 인식하기 때문에 숫자를 그대로 넣으면 오류가 난다!!
-        circlePassedDate.setText(String.valueOf(passedDate));
-
 
         // ======  습관 진행 바 내용
         // 처음 습관을 만들었을 때 기본값을 보여준다
         int didDays = currentHabit.getDidDays();
 
-        // 바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
-        if(didDays != 0 && passedDate != 0){
-            int doPercent = (int) ((didDays / (float)passedDate) * 100);
-            progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성    " + doPercent +"%");
-        } else {
-            progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
+        if(currentHabit.isStartsTomorrow()){ // 습관을 내일부터 시작한 경우
+            if(passedDate != 0){
+                int doPercent = (int) ((didDays / (float)passedDate) * 100);
+                progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성    " + doPercent +"%");
+                circlePassedDate.setText(String.valueOf(passedDate));
+            } else if(passedDate == 0 && didDays == 0){ // 내일부터 시작하는 습관을 만든 당일에는 체크버튼 비활성화
+                progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성    " +"    100%");
+                circlePassedDate.setText(String.valueOf(passedDate));
+                chkBtn.setEnabled(false);
+            }
+        } else { // 습관을 오늘부터 시작한 경우 (습관을 만든 당일부터 1일로 센다)
+            int doPercent = (int) ((didDays / (float)(passedDate + 1)) * 100);
+            progressTextView.setText((passedDate + 1) + "일 중 " + didDays + "일 달성    " + doPercent +"%");
+            circlePassedDate.setText(String.valueOf(passedDate + 1));
         }
 
         // ===== 습관 체크버튼 활성화/비활성화 여부 (횟수를 모두 채우고, 동일한 날짜라면 체크버튼 비활성화)
@@ -142,13 +142,15 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
                     nameTextView.setText(currentHabit.getHabitName() + "    " + doCount + "/" + totalCount);
                     currentHabit.setDidDays(1);
                     chkBtn.setEnabled(false);
+
                     int didDays = currentHabit.getDidDays();
-                    //바로 나누면 0/0 이 되어버려서 자동으로 어플이 종료된다
-                    if(didDays != 0 && passedDate != 0){
+
+                    if(currentHabit.isStartsTomorrow()){
                         int doPercent = (int) ((didDays / (float)passedDate) * 100);
                         progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성    " + doPercent +"%");
                     } else {
-                        progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성" + "    100%");
+                        int doPercent = (int) ((didDays / (float)(passedDate + 1)) * 100);
+                        progressTextView.setText((passedDate + 1) + "일 중 " + didDays + "일 달성    " + doPercent +"%");
                     }
                 }
 
@@ -163,28 +165,3 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         return listItemView;
     }
 }
-
-
-/*
-
-** 해결해야하는 문제
-
-1. 체크버튼을 눌렀을 때 어플이 강제종료되는 문제: 쓰레드 사용해서 DB접근과 UI접근을 분리하여 해결해야함
-
-    처음 했던 생각: 버튼을 눌렀을 때 바로 currentHabit에 값을 적절히 할당하고, 마지막에 별도의 쓰레드를 사용해서 저장
-
-    수정한 생각: 체크버튼으로 클릭된 값은 사용자가 보고 있을 때만 유지되면 된다 (그러니까 굳이 사용자가 클릭할 때마다 db에 저장할 필요는 없다!)
-    => 즉 프로그램이 종료되기 전에만 최종 값을 저장하면 되는 것이다!! (사용자가 어플을 켜서 한 번 체크할 수도, 여러번 체크할 수도 있다. 어차피 필요한 건 마지막 데이터다!!)
-    ==> 프로그램이 종료되는 시점에 db를 저장하는 동작을 실행시킨다!!
-
-    ===> onPause(), onStop(), onDestroy(), 강제종료되는 경우
-    ==> onPause(), onStop()일 때 현재 상태 정보를 저장하는 것이 좋아보인다.
-
-    소문제1. HabitAdapter 에서 설정한 currentHabit을 어떻게 onPause()에 전달해서 db에 저장할 것인가 ==> 해결불가
-
-
-2. passedDate가 1일인데, 핸드폰 날짜를 수동으로 조절한 다음 체크버튼을 누르면 2까지 올라감 (200%가 되버림)
-- 이 문제는 처음 습관을 만들었을 때 passedDate가 0으로 시작하는 문제 (startsTomorrow 의 여부에 따라서 조절해줘야됨)
-- startsTomorrow == true 라면 체크버튼도 내일까지는 비활성화 시켜줘야됨
-
- */

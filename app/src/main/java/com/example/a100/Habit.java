@@ -4,7 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity
-public class Habit {
+public class Habit{
 
     @PrimaryKey(autoGenerate = true)
     private int id = 0;

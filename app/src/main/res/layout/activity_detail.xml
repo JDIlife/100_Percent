@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DetailActivity">
+
+    <Button
+        android:id="@+id/goback_btn"
+        android:layout_width="76dp"
+        android:layout_height="37dp"
+        android:text="back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/see_more_btn"
+        android:layout_width="87dp"
+        android:layout_height="38dp"
+        android:text="더보기"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="40dp"
+        android:background="#C0BCBC"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2">
+
+            <ImageView
+                android:id="@+id/imageView4"
+                android:layout_width="83dp"
+                android:layout_height="86dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/circle_list_background" />
+
+            <TextView
+                android:id="@+id/sub_circle_duration"
+                android:layout_width="58dp"
+                android:layout_height="37dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/line_break"
+                android:gravity="center"
+                android:text="TextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/sub_circle_passed_date"
+                android:layout_width="58dp"
+                android:layout_height="37dp"
+                android:layout_marginBottom="12dp"
+                android:gravity="center"
+                android:text="TextView"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="10"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/sub_habit_name"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/sub_habit_progress"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="TextView" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="380dp"
+        android:layout_height="39dp"
+        android:layout_marginTop="12dp"
+        android:gravity="start"
+        android:text="목표:"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.516"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="406dp"
+        android:layout_height="433dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/diary_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/diary_input"
+        android:layout_width="314dp"
+        android:layout_height="69dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="4dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/diary_input_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="SpeakableTextPresentCheck,SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/diary_input_btn"
+        android:layout_width="72dp"
+        android:layout_height="51dp"
+        android:text="입력"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

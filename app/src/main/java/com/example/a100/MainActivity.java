@@ -75,11 +75,18 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
-                startActivity(intent);
-                Toast.makeText(getApplicationContext(), ""+id, Toast.LENGTH_SHORT).show(); // position을 통해 몇번째를 불렀는지 알 수 있다.
 
-                // 문제: chkBtn.setEnabled(false) 가 되어있지 않은 상태에서는 이 메서드를 실행할 수 없다!
-                // 체크버튼의 xml 요소에서 focusable=false 로 설정해서 해결!!
+                // 선택된 listViewItem 의 Room 데이터를 DetailActivity Intent 로 전달한다
+                Habit currentHabit = (Habit)parent.getItemAtPosition(position);
+
+                intent.putExtra("habitName", currentHabit.getHabitName());
+                intent.putExtra("duration", currentHabit.getDuration());
+                intent.putExtra("didDays", currentHabit.getDidDays());
+                intent.putExtra("count", currentHabit.getCount());
+                intent.putExtra("createdDate", currentHabit.getCreatedDate());
+                intent.putExtra("startsTomorrow", currentHabit.isStartsTomorrow());
+
+                startActivity(intent);
             }
         });
 

@@ -19,7 +19,6 @@ abstract public class HabitDatabase extends RoomDatabase {
         synchronized (sLock){
             if(INSTANCE==null){
                 INSTANCE= Room.databaseBuilder(context.getApplicationContext(), HabitDatabase.class, "Habit.db")
-//                        .allowMainThreadQueries() // 이 부분 때문에 습관을 추가했을 때 listview가 업데이트되지 는다
                         .build();
             }
             return INSTANCE;

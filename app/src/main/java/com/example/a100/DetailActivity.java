@@ -1,35 +1,69 @@
 package com.example.a100;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toolbar;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
 
+    private HabitDao mHabitDao;
+    private HabitDatabase mHabitDatabase;
+    private Habit habit;
+    private List<Habit> habitList;
+
+    class DBDeleteThread implements Runnable{
+
+        @Override
+        public void run(){
+            try {
+                // onCreate() 에서 this.habit = habit 으로 초기화된 habit을 이용해서 습관 삭제
+                mHabitDao.setDeleteHabit(habit);
+
+            } catch (Exception e){
+                // error Handling
+            }
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        // Intent 를 받아 해당하는 변수를 만들고 초기화한다
-        Intent intent = getIntent();
+        // room 데이터베이스 초기화
+        mHabitDatabase = HabitDatabase.getInstance(this);
+        mHabitDao = mHabitDatabase.habitDao();
 
-        String habitName = intent.getStringExtra("habitName");
-        String duration = intent.getStringExtra("duration");
-        int didDays = intent.getIntExtra("didDays", 0);
-        String count = intent.getStringExtra("count");
-        long createdDate = intent.getLongExtra("createdDate", 0);
-        boolean startsTomorrow = intent.getBooleanExtra("startsTomorrow", false);
+        // Toolbar 설정
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("");
+        ab.setDisplayHomeAsUpEnabled(true);
+
+        Habit habit = getIntent().getParcelableExtra("habit");
+        // onCreate() 하면서 인스턴스 변수인 habit을 초기화
+        this.habit = habit;
+
+        String habitName = habit.getHabitName();
+        String duration = habit.getDuration();
+        boolean startsTomorrow = habit.isStartsTomorrow();
+        int didDays = habit.getDidDays();
+        long createdDate = habit.getCreatedDate();
 
         // ============== Detail UI 지정 ============//
 
@@ -38,8 +72,6 @@ public class DetailActivity extends AppCompatActivity {
         TextView habitNameTextView = (TextView) findViewById(R.id.sub_habit_name);
         TextView habitProgressTextView = (TextView) findViewById(R.id.sub_habit_progress);
 
-        Button backBtn = (Button) findViewById(R.id.goback_btn);
-        Button seeMoreBtn = (Button) findViewById(R.id.see_more_btn);
         EditText diaryInput = (EditText) findViewById(R.id.diary_input);
         Button diaryInputBtn = (Button) findViewById(R.id.diary_input_btn);
 
@@ -76,5 +108,46 @@ public class DetailActivity extends AppCompatActivity {
             circlePassedDate.setText(String.valueOf(passedDate + 1));
         }
 
+    }
+
+    // menu 를 그려준다
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case android.R.id.home: { // 툴바의 뒤로가기 버튼을 누르면 홈화면으로 이동한다
+                finish();
+                return true;
+            }
+            // 더보기 메뉴에 달리는 기능들
+            case R.id.set_goal: { // 목표 추가하기
+                Toast.makeText(this, "set goal", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case R.id.edit_habit: { // 습관 수정하기
+
+                Toast.makeText(this, "edit habit", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case R.id.delete_habit: { // 습관 삭제하기
+
+                // Room DB의 습관 삭제
+                DBDeleteThread dbDeleteThread = new DBDeleteThread();
+                Thread t = new Thread(dbDeleteThread);
+                t.start();
+
+                // mainActivity 로 돌아감
+                finish();
+                break;
+            }
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

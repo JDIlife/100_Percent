@@ -2,6 +2,7 @@ package com.example.a100;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
 
 import java.util.List;
 
@@ -33,9 +35,8 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
             try {
                 // db 접근
                 habitList = mHabitDao.getHabitAll();
-
                 habitAdapter = new HabitAdapter(MainActivity.this, habitList);
-                habitListView.setAdapter(habitAdapter);
+                habitListView.setAdapter(habitAdapter); // => 습관 삭제 이후에 habitListView를 제대로 잡지 못하고있다.
             } catch (Exception e){
                 // error Handling
             }
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("LIFE CHECK", "onCreate()");
+        Toast.makeText(this, "onCreate()", Toast.LENGTH_SHORT).show();
         // ======== 필요한 UI 요소 지정
         habitListView = findViewById(R.id.habit_listview);
 
@@ -77,14 +80,9 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
                 Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
 
                 // 선택된 listViewItem 의 Room 데이터를 DetailActivity Intent 로 전달한다
-                Habit currentHabit = (Habit)parent.getItemAtPosition(position);
+                Habit clickedHabit = (Habit)parent.getItemAtPosition(position);
 
-                intent.putExtra("habitName", currentHabit.getHabitName());
-                intent.putExtra("duration", currentHabit.getDuration());
-                intent.putExtra("didDays", currentHabit.getDidDays());
-                intent.putExtra("count", currentHabit.getCount());
-                intent.putExtra("createdDate", currentHabit.getCreatedDate());
-                intent.putExtra("startsTomorrow", currentHabit.isStartsTomorrow());
+                intent.putExtra("habit", clickedHabit);
 
                 startActivity(intent);
             }
@@ -121,6 +119,33 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
         Thread t = new Thread(habitInsertThread);
         t.start();
 
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        habitListView.setAdapter(habitAdapter);
+
+        DBResumeThread dbResumeThread = new DBResumeThread();
+        Thread t = new Thread(dbResumeThread);
+        t.start();
+
+    }
+
+    class DBResumeThread implements Runnable{
+        @Override
+        public void run(){
+            try {
+                // db 접근
+                habitList = mHabitDao.getHabitAll();
+                habitAdapter = new HabitAdapter(MainActivity.this, habitList);
+                habitListView.setAdapter(habitAdapter);
+
+            } catch (Exception e){
+                // error Handling
+            }
+        }
     }
 
 }

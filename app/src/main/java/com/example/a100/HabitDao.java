@@ -24,6 +24,9 @@ public interface HabitDao {
     @Delete
     void setDeleteHabit(Habit habit);
 
+    @Query("SELECT * FROM Habit WHERE id = :id")
+    Habit getHabitById(int id);
+
     @Query("SELECT * FROM Habit")
     List<Habit> getHabitAll();
 

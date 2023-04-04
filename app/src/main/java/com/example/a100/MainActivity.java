@@ -48,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d("LIFE CHECK", "onCreate()");
-        Toast.makeText(this, "onCreate()", Toast.LENGTH_SHORT).show();
         // ======== 필요한 UI 요소 지정
         habitListView = findViewById(R.id.habit_listview);
 
@@ -125,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
     protected void onResume(){
         super.onResume();
 
+        // UI 스레드(Main Thread) 에서 habitListview 의 어댑터를 설정한다(기본값 null인 상태)
         habitListView.setAdapter(habitAdapter);
 
         DBResumeThread dbResumeThread = new DBResumeThread();
@@ -137,9 +136,10 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
         @Override
         public void run(){
             try {
-                // db 접근
+                // 습관 삭제 이후 최신화된 Room DB 를 불러와서 새로운 어댑터를 만든다
                 habitList = mHabitDao.getHabitAll();
                 habitAdapter = new HabitAdapter(MainActivity.this, habitList);
+                // 새로운 어댑터를 habitListView 에 부착한다. habitAdapter 가 null 이 아니라 새롭게 만든 어댑터로 초기화된다
                 habitListView.setAdapter(habitAdapter);
 
             } catch (Exception e){

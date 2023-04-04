@@ -4,12 +4,15 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -137,13 +140,24 @@ public class DetailActivity extends AppCompatActivity {
             }
             case R.id.delete_habit: { // 습관 삭제하기
 
-                // Room DB의 습관 삭제
-                DBDeleteThread dbDeleteThread = new DBDeleteThread();
-                Thread t = new Thread(dbDeleteThread);
-                t.start();
+                // 다이얼로그의 OK 버튼을 누르면 수행될 리스너
+                DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DBDeleteThread dbDeleteThread = new DBDeleteThread();
+                        Thread t = new Thread(dbDeleteThread);
+                        t.start();
+                        finish();
+                    }
+                };
 
-                // mainActivity 로 돌아감
-                finish();
+                // 기본 다이얼로그 생성
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("정말 습관을 삭제하시겠습니까?")
+                        .setPositiveButton("OK", okListener)
+                        .setNegativeButton("Cancel", null)
+                        .show();
+
                 break;
             }
 

@@ -3,10 +3,20 @@ package com.example.a100;
 import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.ProvidedTypeConverter;
+import androidx.room.TypeConverter;
+import androidx.room.TypeConverters;
+
+import com.google.gson.Gson;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Entity
 public class Habit implements Parcelable {
@@ -23,9 +33,13 @@ public class Habit implements Parcelable {
     private String checkedDate;
     private int doCount;
 
-    public Habit(){
+    private String goal;
+    // 습관 일지: 기본적인 Room 데이터베이스에서는 List가 지원되지 않아 Gson을 사용한다
+    @ColumnInfo(name = "diary")
+    private List<String> diary;
 
-    }
+    // 기본 생성자
+    public Habit(){}
 
     @Override
     public int describeContents() {
@@ -154,5 +168,32 @@ public class Habit implements Parcelable {
         this.doCount = 0;
     }
 
+    public void setGoal(String goal){this.goal = goal;}
 
+    public String getGoal(){return this.goal;}
+
+    public void setDiary(List<String> diary){
+        this.diary = diary;
+    }
+
+    public List<String> getDiary(){
+        return this.diary;
+    }
+
+}
+
+// Gson 을 사용해서 List<String> 을 JSON 으로 변환하여 저장하고, JSON 을 다시 List<String> 으로 변환할 수 있도록 하는 TypeConverter 작성
+@ProvidedTypeConverter
+class StringListTypeConverter {
+    private Gson gson = new Gson();
+
+    @TypeConverter
+    public String listToJson(List<String> diary){
+        return gson.toJson(diary);
+    }
+
+    @TypeConverter
+    public List<String> jsonToList(String str){
+        return Arrays.asList(gson.fromJson(str, String[].class));
+    }
 }

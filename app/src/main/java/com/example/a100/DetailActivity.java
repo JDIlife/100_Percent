@@ -6,9 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,7 +28,6 @@ public class DetailActivity extends AppCompatActivity {
     private List<Habit> habitList;
 
     class DBDeleteThread implements Runnable{
-
         @Override
         public void run(){
             try {
@@ -42,6 +39,14 @@ public class DetailActivity extends AppCompatActivity {
             }
         }
     }
+
+    class DBInputGoalThread implements Runnable{
+        @Override
+        public void run(){
+//            mHabitDao.setUpdateHabit();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,6 +115,15 @@ public class DetailActivity extends AppCompatActivity {
             habitProgressTextView.setText((passedDate + 1) + "일 중 " + didDays + "일 달성    " + doPercent +"%");
             circlePassedDate.setText(String.valueOf(passedDate + 1));
         }
+
+        diaryInputBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DBInputGoalThread dbInputGoalthread = new DBInputGoalThread();
+                Thread t = new Thread(dbInputGoalthread);
+                t.start();
+            }
+        });
 
     }
 

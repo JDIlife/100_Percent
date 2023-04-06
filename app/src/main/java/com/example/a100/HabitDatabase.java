@@ -2,12 +2,19 @@ package com.example.a100;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.room.AutoMigration;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Habit.class}, version = 2, exportSchema = false)
+@Database(entities = {Habit.class}, version = 3, exportSchema = false)
+@TypeConverters({StringListTypeConverter.class})
 abstract public class HabitDatabase extends RoomDatabase {
+
     public abstract HabitDao habitDao();
 
     // 싱글톤 패턴으로 Room Database 구현
@@ -19,10 +26,21 @@ abstract public class HabitDatabase extends RoomDatabase {
         synchronized (sLock){
             if(INSTANCE==null){
                 INSTANCE= Room.databaseBuilder(context.getApplicationContext(), HabitDatabase.class, "Habit.db")
+                        // TypeConverter 추가
+                        .addTypeConverter(new StringListTypeConverter())
+                        // 마이그레이션 추가
+                        .addMigrations(MIGRATION_2_3)
                         .build();
             }
             return INSTANCE;
         }
     }
 
+    // 수동 마이그레이션 코드
+    static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE Habit ADD COLUMN diary TEXT");
+        }
+    };
 }

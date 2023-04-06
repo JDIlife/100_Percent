@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Objects;
 
 public class CustomDialog extends Dialog  implements View.OnClickListener{
@@ -85,6 +86,11 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 String checkedDate = dateFormat.format(createdDate);
                 habit.setCheckedDate(checkedDate);
+
+                // 나중에 사용자가 습관 상세 페이지에서 입력할 값들이 null 이 되지 않도록 초기화
+                habit.setGoal("");
+                List<String> a = new ArrayList<>();
+                habit.setDiary(a);
 
                 // 리스너 인터페이스 함수 호출
                 onSaveClickListener.onSaveClicked(habit);

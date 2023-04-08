@@ -89,8 +89,8 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
 
                 // 나중에 사용자가 습관 상세 페이지에서 입력할 값들이 null 이 되지 않도록 초기화
                 habit.setGoal("");
-                List<String> a = new ArrayList<>();
-                habit.setDiary(a);
+                List<String> defaultDiary = new ArrayList<>();
+                habit.setDiary(defaultDiary);
 
                 // 리스너 인터페이스 함수 호출
                 onSaveClickListener.onSaveClicked(habit);

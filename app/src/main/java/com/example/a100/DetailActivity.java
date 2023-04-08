@@ -3,6 +3,8 @@ package com.example.a100;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -11,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -36,7 +39,7 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         public void run(){
             try {
-                // onCreate() 에서 this.habit = habit 으로 초기화된 habit을 이용해서 습관 삭제
+                // onCreate() 에서 this.habit = habit 으로 초기화된 habit 을 이용해서 습관 삭제
                 mHabitDao.setDeleteHabit(habit);
 
             } catch (Exception e){
@@ -135,14 +138,52 @@ public class DetailActivity extends AppCompatActivity {
         CharSequence str = habit.getGoal();
         goalTextView.setText("목표: " + str);
 
+        // 기존에 존재하는 diary 항목들을 가져온다
+        this.diaryList = habit.getDiary();
+
+        // ========== 상세 페이지 RecyclerView 설정 부분
+        List<String> dataSet = habit.getDiary();
+
+        RecyclerView recyclerView = findViewById(R.id.diary_recycler_view);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet);
+        recyclerView.setAdapter(diaryListAdapter);
+
+        // ============ 입력 버튼을 누르면 습관 일지가 저장되는 부분
         diaryInputBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                diaryList.add(String.valueOf(diaryInput.getText()));
+                // 습관 일지 작성일자
+                GregorianCalendar today = new GregorianCalendar();
+                SimpleDateFormat todayDateFormat = new SimpleDateFormat("yyyyMMdd");
+                String todayDate = todayDateFormat.format(today.getTime());
+
+                // 사용자가 습관일지를 입력할 때 자동으로 작성일자를 더해서 저장한다
+                String diary = todayDate + String.valueOf(diaryInput.getText());
+
+                // 기존에 존재하는 diary 항목에 추가해서 저장한다
+                diaryList.add(diary);
 
                 DBInputDiaryThread dbInputDiaryThread = new DBInputDiaryThread();
                 Thread t = new Thread(dbInputDiaryThread);
                 t.start();
+
+                // 사용자가 습관 일지 추가 버튼을 누르면 자동으로 diaryInput 에 써있던 텍스트를 지우고, 가상 키보드를 숨긴다
+                diaryInput.setText("");
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(diaryInput.getWindowToken(), 0);
+
+                // 습관 일지 추가 버튼을 누르면 곧바로 RecyclerView 에 적용되도록 어뎁터를 설정해준다
+                List<String> dataSet = habit.getDiary();
+
+                RecyclerView recyclerView = findViewById(R.id.diary_recycler_view);
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(DetailActivity.this);
+                recyclerView.setLayoutManager(linearLayoutManager);
+
+                DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet);
+                recyclerView.setAdapter(diaryListAdapter);
             }
         });
 
@@ -222,19 +263,3 @@ public class DetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
-
-/*
-    goal 이 왜 최신화가 안되나?
-
-    처음 습관 생성 habit.gaol == ""  ==> 목표 추가 habit.goal = "목표" ==> habit.setUpdate(goal) ==> 뒤로 가기 ==> 다시 습관 상세 페이지 ==> setText(habit.getGoal())
-
-    이 로직대로면 목표를 설정했다가 뒤로 나갔다가 다시 돌아왔을 때 정상적으로 습관이 갱신돼서 상세 페이지에 보여야하는데, 실제로는 빈 화면만 나온다...
-
-    1. 데이터가 제대로 저장되지 않았나?? ==> DB를 확인해보면 goal 데이터는 정상적으로 업데이트 되었다!!
-
-    완전히 다시 어플을 시작했을 때를 보면 goalTextView 에 제대로 setText를 하지 못하는 모습이다.
-    2. setText() 는 charSequence 인데, getGoal 은 String 을 반환해서 그런가?? ==> habit.getGoal() 을 CharSequence 로 형변한 한 뒤에 setText() 안에 넣었지만 여전히 안된다
-
-    3. 목표가 goal 에는 잘 저장되어있는데, 막상 "목표"+ 를 붙여서 확인해보니 getGoal() 이 null 이다??!! ==> 그래서 빈화면이 나왔던 것!
-    ===> 아하!! 인텐트에 goal 을 설정해주지 않아서 그렇다!! 습관 상세목표이지로 ㄷ
- */

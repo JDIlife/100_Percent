@@ -15,6 +15,7 @@ import androidx.room.TypeConverters;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,6 +62,8 @@ public class Habit implements Parcelable {
         dest.writeString(checkedDate);
         dest.writeInt(doCount);
         dest.writeString(goal);
+        dest.writeStringList(diary);
+        // 여기서는 diary size=2로 null 이 아니다. 디버거를 확인하니, 내용도 정상적으로 들어있다!
     }
     // 역직렬화용 생성자
     protected Habit(Parcel in) {
@@ -74,6 +77,12 @@ public class Habit implements Parcelable {
         checkedDate = in.readString();
         doCount = in.readInt();
         goal = in.readString();
+
+        // diary 를 ArrayList<>() 로 초기화한다
+        diary = new ArrayList<>();
+        // 초기화한 diary 에 dest.writeStringList(diary) 를 이용해서 parcel 에 보내준 값을 추가한다
+        // readStringList() 는 void 타입이지만, 메서드의 인수로 전달되는 개체를 수정하기 때문에 가능하다
+        in.readStringList(diary);
     }
 
     // 역직렬화용 메서드
@@ -196,7 +205,6 @@ class StringListTypeConverter {
 
     @TypeConverter
     public List<String> jsonToList(String str){
-
         return Arrays.asList(gson.fromJson(str, String[].class));
     }
 }

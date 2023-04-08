@@ -24,11 +24,15 @@ public interface HabitDao {
     @Delete
     void setDeleteHabit(Habit habit);
 
-    @Query("SELECT * FROM Habit WHERE id = :id")
-    Habit getHabitById(int id);
-
     @Query("SELECT * FROM Habit")
     List<Habit> getHabitAll();
+
+
+    @Query("UPDATE Habit SET diary = :newDiary WHERE id = :habitId")
+    void setUpdateDiary(int habitId, List<String> newDiary);
+
+    @Query("UPDATE Habit SET goal = :newGoal WHERE id = :habitId")
+    void setUpdateGoal(int habitId, String newGoal);
 
 }
 

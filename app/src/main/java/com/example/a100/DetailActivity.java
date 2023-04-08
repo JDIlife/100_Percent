@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -26,6 +27,10 @@ public class DetailActivity extends AppCompatActivity {
     private HabitDatabase mHabitDatabase;
     private Habit habit;
     private List<Habit> habitList;
+    private List<String> diaryList = new ArrayList<>();
+    private String goal;
+
+    TextView goalTextView;
 
     class DBDeleteThread implements Runnable{
         @Override
@@ -40,10 +45,19 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    // diary 만 업데이트하는 스레드
+    class DBInputDiaryThread implements Runnable{
+        @Override
+        public void run(){
+            mHabitDao.setUpdateDiary(habit.getId(), diaryList);
+        }
+    }
+
+    // gaol 만 업데이트하는 스레드
     class DBInputGoalThread implements Runnable{
         @Override
         public void run(){
-//            mHabitDao.setUpdateHabit();
+            mHabitDao.setUpdateGoal(habit.getId(), goal);
         }
     }
 
@@ -79,6 +93,8 @@ public class DetailActivity extends AppCompatActivity {
         TextView circlePassedDate = (TextView) findViewById(R.id.sub_circle_passed_date);
         TextView habitNameTextView = (TextView) findViewById(R.id.sub_habit_name);
         TextView habitProgressTextView = (TextView) findViewById(R.id.sub_habit_progress);
+
+        TextView goalTextView = (TextView) findViewById(R.id.goal_textview);
 
         EditText diaryInput = (EditText) findViewById(R.id.diary_input);
         Button diaryInputBtn = (Button) findViewById(R.id.diary_input_btn);
@@ -116,11 +132,16 @@ public class DetailActivity extends AppCompatActivity {
             circlePassedDate.setText(String.valueOf(passedDate + 1));
         }
 
+        CharSequence str = habit.getGoal();
+        goalTextView.setText("목표: " + str);
+
         diaryInputBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DBInputGoalThread dbInputGoalthread = new DBInputGoalThread();
-                Thread t = new Thread(dbInputGoalthread);
+                diaryList.add(String.valueOf(diaryInput.getText()));
+
+                DBInputDiaryThread dbInputDiaryThread = new DBInputDiaryThread();
+                Thread t = new Thread(dbInputDiaryThread);
                 t.start();
             }
         });
@@ -144,7 +165,29 @@ public class DetailActivity extends AppCompatActivity {
             }
             // 더보기 메뉴에 달리는 기능들
             case R.id.set_goal: { // 목표 추가하기
-                Toast.makeText(this, "set goal", Toast.LENGTH_SHORT).show();
+                EditText et1 = new EditText(DetailActivity.this);
+
+                // 다이얼로그의 OK 버튼을 누르면 수행될 리스너
+                DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        goal = String.valueOf(et1.getText());
+
+                        goalTextView = findViewById(R.id.goal_textview);
+                        goalTextView.setText("목표: " + goal);
+                        DBInputGoalThread dbInputGoalThread = new DBInputGoalThread();
+                        Thread t = new Thread(dbInputGoalThread);
+                        t.start();
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("목표를 입력하세요")
+                        .setView(et1)
+                        .setPositiveButton("ok", okListener)
+                        .setNegativeButton("cancel", null)
+                        .show();
+
                 break;
             }
             case R.id.edit_habit: { // 습관 수정하기
@@ -179,3 +222,19 @@ public class DetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+
+/*
+    goal 이 왜 최신화가 안되나?
+
+    처음 습관 생성 habit.gaol == ""  ==> 목표 추가 habit.goal = "목표" ==> habit.setUpdate(goal) ==> 뒤로 가기 ==> 다시 습관 상세 페이지 ==> setText(habit.getGoal())
+
+    이 로직대로면 목표를 설정했다가 뒤로 나갔다가 다시 돌아왔을 때 정상적으로 습관이 갱신돼서 상세 페이지에 보여야하는데, 실제로는 빈 화면만 나온다...
+
+    1. 데이터가 제대로 저장되지 않았나?? ==> DB를 확인해보면 goal 데이터는 정상적으로 업데이트 되었다!!
+
+    완전히 다시 어플을 시작했을 때를 보면 goalTextView 에 제대로 setText를 하지 못하는 모습이다.
+    2. setText() 는 charSequence 인데, getGoal 은 String 을 반환해서 그런가?? ==> habit.getGoal() 을 CharSequence 로 형변한 한 뒤에 setText() 안에 넣었지만 여전히 안된다
+
+    3. 목표가 goal 에는 잘 저장되어있는데, 막상 "목표"+ 를 붙여서 확인해보니 getGoal() 이 null 이다??!! ==> 그래서 빈화면이 나왔던 것!
+    ===> 아하!! 인텐트에 goal 을 설정해주지 않아서 그렇다!! 습관 상세목표이지로 ㄷ
+ */

@@ -60,6 +60,7 @@ public class Habit implements Parcelable {
         dest.writeString(count);
         dest.writeString(checkedDate);
         dest.writeInt(doCount);
+        dest.writeString(goal);
     }
     // 역직렬화용 생성자
     protected Habit(Parcel in) {
@@ -72,6 +73,7 @@ public class Habit implements Parcelable {
         count = in.readString();
         checkedDate = in.readString();
         doCount = in.readInt();
+        goal = in.readString();
     }
 
     // 역직렬화용 메서드
@@ -194,6 +196,7 @@ class StringListTypeConverter {
 
     @TypeConverter
     public List<String> jsonToList(String str){
+
         return Arrays.asList(gson.fromJson(str, String[].class));
     }
 }

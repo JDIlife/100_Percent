@@ -85,7 +85,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/textView11"
+        android:id="@+id/goal_textview"
         android:layout_width="380dp"
         android:layout_height="39dp"
         android:layout_marginTop="12dp"

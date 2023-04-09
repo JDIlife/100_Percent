@@ -3,15 +3,18 @@ package com.example.a100;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -151,6 +154,7 @@ public class DetailActivity extends AppCompatActivity {
         DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet);
         recyclerView.setAdapter(diaryListAdapter);
 
+
         // ============ 입력 버튼을 누르면 습관 일지가 저장되는 부분
         diaryInputBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,6 +190,7 @@ public class DetailActivity extends AppCompatActivity {
                 recyclerView.setAdapter(diaryListAdapter);
             }
         });
+
 
     }
 
@@ -261,5 +266,26 @@ public class DetailActivity extends AppCompatActivity {
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // 사용자가 EditText 를 눌러 키보드가 올라온 상태에서 다른 영역을 터치하면 키보드가 숨겨지는 기능
+    // Activity 클래스의 메서드인 dispatchTouchEvent 사용 : 별도의 호출이 없어도 활동 창에서 터치 이벤트가 발생할 때마다 자동으로 호출됨
+    public boolean dispatchTouchEvent(MotionEvent ev){
+        // 현재 인풋 포커스를 가진 화면을 가져온다
+        View view = getCurrentFocus();
+        // view 가 존재하는지, EditText 의 요소인지, android.webkit 패키지가 아닌지 확인
+        if (view != null && (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_MOVE) && view instanceof EditText && !view.getClass().getName().startsWith("android.webkit")) {
+            // EditText view 의 화면 좌표를 얻는다
+            int scrcoods[] = new int[2];
+            view.getLocationOnScreen(scrcoods);
+            // EditText view 로 부터 상대적으로 터치 이벤트가 일어난 위치를 얻는다
+            float x = ev.getRawX() + view.getLeft() - scrcoods[0];
+            float y = ev.getRawY() + view.getTop() - scrcoods[1];
+            // 터치 이벤트가 EditText view 바깥에서 일어났는지 확인
+            if(x < view.getLeft() || x > view.getRight() || y < view.getTop() || y > view.getBottom()){
+                ((InputMethodManager)this.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow((this.getWindow().getDecorView().getApplicationWindowToken()), 0);
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 }

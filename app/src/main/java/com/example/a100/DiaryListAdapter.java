@@ -1,8 +1,16 @@
 package com.example.a100;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -41,7 +49,7 @@ public class DiaryListAdapter extends RecyclerView.Adapter<DiaryListAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         String text = localDataSet.get(position);
 
         if(!text.isEmpty()){ // diary 의 내용이 비어있지 않을 때, diary 가 비어있지 않을 때만 값을 RecyclerView 에 할당한다
@@ -53,12 +61,41 @@ public class DiaryListAdapter extends RecyclerView.Adapter<DiaryListAdapter.View
             holder.diaryContentTextView.setText(diaryContent);
         }
 
+        // 습관 일지를 롱터치하면 팝업메뉴를 보여준다
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener(){
+            @Override
+            public boolean onLongClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+                popupMenu.getMenuInflater().inflate(R.menu.diary_menu, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()){
+                            // 일지 수정을 눌렀을 때 처리
+                            case R.id.edit_diary:
+                                // 입력을 받을 수 있는 다이얼로그를 띄워준다
+
+                                break;
+                            // 일지 삭제를 눌렀을 때 처리
+                            case R.id.delete_diary:
+                                localDataSet.remove(position);
+                                notifyItemRemoved(position);
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
+
+                return false;
+            }
+        });
+
     }
 
     @Override
     public int getItemCount() {
         return localDataSet.size();
     }
-
 
 }

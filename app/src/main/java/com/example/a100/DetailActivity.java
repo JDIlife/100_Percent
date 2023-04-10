@@ -4,6 +4,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -188,10 +189,9 @@ public class DetailActivity extends AppCompatActivity {
 
                 DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet);
                 recyclerView.setAdapter(diaryListAdapter);
+
             }
         });
-
-
     }
 
     // menu 를 그려준다
@@ -206,6 +206,13 @@ public class DetailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
             case android.R.id.home: { // 툴바의 뒤로가기 버튼을 누르면 홈화면으로 이동한다
+
+                // 상세 페이지에서 사용자가 스와이프로 습관일지를 삭제한 상태에서 메인 엑티비티로 돌아갈 때
+                // 습관일지가 삭제되서 최신화된 상태로 습관을 업데이트한다
+                DBInputDiaryThread dbInputDiaryThread = new DBInputDiaryThread();
+                Thread t = new Thread(dbInputDiaryThread);
+                t.start();
+
                 finish();
                 return true;
             }
@@ -288,4 +295,17 @@ public class DetailActivity extends AppCompatActivity {
         }
         return super.dispatchTouchEvent(ev);
     }
+
+    // 사용자가 습관일지 삭제 이후 토글의 뒤로가기 버튼을 통해 메인 엑티비티로 돌아가지 않고,
+    // 바로 홈버튼을 눌러서 어플을 강제종료 했을 때, 하단의 뒤로가기 버튼을 눌러서 돌아갔을 때
+    // 정상적으로 습관일지 삭제를 업데이트 한다
+    @Override
+    public void onPause(){
+        super.onPause();
+
+        DBInputDiaryThread dbInputDiaryThread = new DBInputDiaryThread();
+        Thread t = new Thread(dbInputDiaryThread);
+        t.start();
+    }
+
 }

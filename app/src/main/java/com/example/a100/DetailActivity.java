@@ -152,7 +152,7 @@ public class DetailActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet);
+        DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet, this);
         recyclerView.setAdapter(diaryListAdapter);
 
 
@@ -187,7 +187,7 @@ public class DetailActivity extends AppCompatActivity {
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(DetailActivity.this);
                 recyclerView.setLayoutManager(linearLayoutManager);
 
-                DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet);
+                DiaryListAdapter diaryListAdapter = new DiaryListAdapter(dataSet, DetailActivity.this);
                 recyclerView.setAdapter(diaryListAdapter);
 
             }
@@ -296,7 +296,7 @@ public class DetailActivity extends AppCompatActivity {
         return super.dispatchTouchEvent(ev);
     }
 
-    // 사용자가 습관일지 삭제 이후 토글의 뒤로가기 버튼을 통해 메인 엑티비티로 돌아가지 않고,
+    // 사용자가 습관일지 삭제, 수정 이후 토글의 뒤로가기 버튼을 통해 메인 엑티비티로 돌아가지 않고,
     // 바로 홈버튼을 눌러서 어플을 강제종료 했을 때, 하단의 뒤로가기 버튼을 눌러서 돌아갔을 때
     // 정상적으로 습관일지 삭제를 업데이트 한다
     @Override

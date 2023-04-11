@@ -3,8 +3,6 @@ package com.example.a100;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,14 +20,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements CustomDialog.OnSaveClickListener {
 
     private HabitDao mHabitDao;
     private HabitDatabase mHabitDatabase;
@@ -244,8 +242,9 @@ public class DetailActivity extends AppCompatActivity {
                 break;
             }
             case R.id.edit_habit: { // 습관 수정하기
-
-                Toast.makeText(this, "edit habit", Toast.LENGTH_SHORT).show();
+//                CustomDialog customDialog = new CustomDialog(this, this, habit.getId(), habit.getCreatedDate());
+                CustomDialog customDialog = new CustomDialog(this, this, habit);
+                customDialog.show();
                 break;
             }
             case R.id.delete_habit: { // 습관 삭제하기
@@ -294,6 +293,26 @@ public class DetailActivity extends AppCompatActivity {
             }
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public void onSaveClicked(Habit habit){
+
+        // Room 데이터베이스 초기화
+        mHabitDatabase = HabitDatabase.getInstance(getApplicationContext());
+        mHabitDao = mHabitDatabase.habitDao();
+
+        class HabitUpdateThread implements Runnable{
+            @Override
+            public void run(){
+                mHabitDao.setUpdateHabit(habit);
+            }
+        }
+
+
+        HabitUpdateThread habitUpdateThread = new HabitUpdateThread();
+        Thread t = new Thread(habitUpdateThread);
+        t.start();
     }
 
     // 사용자가 습관일지 삭제, 수정 이후 토글의 뒤로가기 버튼을 통해 메인 엑티비티로 돌아가지 않고,

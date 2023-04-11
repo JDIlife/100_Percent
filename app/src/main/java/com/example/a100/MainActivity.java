@@ -79,9 +79,7 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
 
                 // 선택된 listViewItem 의 Room 데이터를 DetailActivity Intent 로 전달한다
                 Habit clickedHabit = (Habit)parent.getItemAtPosition(position);
-
                 intent.putExtra("habit", clickedHabit);
-
                 startActivity(intent);
             }
         });

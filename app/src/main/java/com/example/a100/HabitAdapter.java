@@ -30,7 +30,6 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
-        Log.d("Get View Test", "get View is running");
         View listItemView = convertView;
         if(listItemView  == null){
             listItemView = LayoutInflater.from(getContext()).inflate(

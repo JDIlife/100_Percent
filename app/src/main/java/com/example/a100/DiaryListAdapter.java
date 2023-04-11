@@ -79,6 +79,7 @@ public class DiaryListAdapter extends RecyclerView.Adapter<DiaryListAdapter.View
                                 // 입력을 받을 수 있는 다이얼로그를 띄워준다
                                 EditText et1 = new EditText(context);
 
+                                // 다이얼로그의 OK 버튼이 클릭되었을 때 실행될 리스너
                                 DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener(){
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {

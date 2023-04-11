@@ -2,28 +2,19 @@ package com.example.a100;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.NumberPicker;
 import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Objects;
 
 public class CustomDialog extends Dialog  implements View.OnClickListener{
 
@@ -31,6 +22,9 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
     private EditText durationEditText;
     private Switch startsTodaySwitch;
     private EditText countEditText;
+
+
+    Habit passedHabit;
 
     // listener 인터페이스
     public interface OnSaveClickListener{
@@ -45,6 +39,13 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         this.onSaveClickListener = onSaveClickListener;
     }
 
+    // 습관을 수정하는 경우에 사용하는 생성자 (수정하기 이전의 기존 habit 을 넘겨받는다)
+    public CustomDialog(Context context, OnSaveClickListener onSaveClickListener, Habit passedHabit){
+        super(context);
+        this.onSaveClickListener = onSaveClickListener;
+        this.passedHabit = passedHabit;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -55,6 +56,13 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         durationEditText = findViewById(R.id.duration_edittext);
         startsTodaySwitch = findViewById(R.id.starts_today);
         countEditText = findViewById(R.id.count);
+
+        // 습관을 수정한다면 기존의 데이터를 미리 입력값으로 세팅한다
+        if (passedHabit.getId() != 0){
+            habitNameEditText.setText(passedHabit.getHabitName());
+            durationEditText.setText(passedHabit.getDuration());
+            startsTodaySwitch.setChecked(passedHabit.isStartsTomorrow());
+        }
 
         // CustomDialog 의 Ok 버튼과 Cancel 버튼을 지정하고 이벤트를 등록
         Button saveBtn = findViewById(R.id.save_btn);
@@ -91,6 +99,14 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
                 habit.setGoal("");
                 List<String> defaultDiary = new ArrayList<>();
                 habit.setDiary(defaultDiary);
+
+                // 습관 수정시 변하지 않는 부분은 기존의 데이터로 셋팅한다
+                if(passedHabit.getId() != 0){
+                    habit.setId(passedHabit.getId());
+                    habit.setCreatedDate(passedHabit.getCreatedDate());
+                    habit.setGoal(passedHabit.getGoal());
+                    habit.setDiary(passedHabit.getDiary());
+                }
 
                 // 리스너 인터페이스 함수 호출
                 onSaveClickListener.onSaveClicked(habit);

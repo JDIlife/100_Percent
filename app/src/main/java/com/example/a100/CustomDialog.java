@@ -103,7 +103,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
                 habit.setDiary(defaultDiary);
 
                 // 습관 수정시 변하지 않는 부분은 기존의 데이터로 셋팅한다
-                if(passedHabit.getId() != 0){
+                if(passedHabit != null){
                     habit.setId(passedHabit.getId());
                     habit.setCreatedDate(passedHabit.getCreatedDate());
                     habit.setGoal(passedHabit.getGoal());

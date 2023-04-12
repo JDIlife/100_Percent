@@ -69,6 +69,8 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         Button cancelBtn = findViewById(R.id.cancel_btn);
         saveBtn.setOnClickListener(this);
         cancelBtn.setOnClickListener(this);
+
+
     }
 
     @Override

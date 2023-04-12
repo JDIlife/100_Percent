@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -83,7 +86,7 @@ public class DiaryListAdapter extends RecyclerView.Adapter<DiaryListAdapter.View
                                 DialogInterface.OnClickListener okListener = new DialogInterface.OnClickListener(){
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        // 기존의 습관일지에서 날짜만 추린다
+                                    // 기존의 습관일지에서 날짜만 추린다
                                         String date = localDataSet.get(position).substring(0, 8);
                                         // 기존의 일지를 삭제한다
                                         localDataSet.remove(position);
@@ -98,8 +101,42 @@ public class DiaryListAdapter extends RecyclerView.Adapter<DiaryListAdapter.View
                                 builder.setTitle("일지를 수정하세요")
                                         .setView(et1)
                                         .setPositiveButton("ok", okListener)
-                                        .setNegativeButton("cancel", null)
-                                        .show();
+                                        .setNegativeButton("cancel", null);
+
+                                // Dialog 의 setOnShowListener() 메서드를 쓰기 위해서 형변환 해준다
+                                AlertDialog dialog = builder.create();
+
+                                // 다이얼로그가 보여질 때 붙을 리스너를 설정한다
+                                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                                    @Override
+                                    public void onShow(DialogInterface dialog) {
+
+                                        // et1 에 어떤 값도 입력되지 않은 상태 && 일지 수정 다이얼로그를 띄운 직후의 상태에서는 ok 버튼을 비활성화 시킨다
+                                        ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!et1.getText().toString().isEmpty());
+
+                                        // TextWatcher 를 이용해서 EditText 의 입력값 변경에 따라 작업을 수행한다
+                                        et1.addTextChangedListener(new TextWatcher() {
+                                            @Override
+                                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                                            }
+
+                                            // et1 에 값이 입력되어있으면 ok 버튼을 활성화한다
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                                            }
+
+                                            // 텍스트 변경이 끝났을 때 아무것도 입력되어있지 않으면 (+ 스페이스바만 입력된 경우도) ok 버튼을 다시 비활성화한다
+                                            @Override
+                                            public void afterTextChanged(Editable s) {
+                                                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!et1.getText().toString().isBlank());
+                                            }
+                                        });
+                                    }
+                                });
+
+                                dialog.show();
+
                                 break;
                             }
                             case R.id.delete_diary: { // 일지 삭제를 눌렀을 때 처리

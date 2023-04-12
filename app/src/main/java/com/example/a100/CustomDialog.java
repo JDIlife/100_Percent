@@ -58,7 +58,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         countEditText = findViewById(R.id.count);
 
         // 습관을 수정한다면 기존의 데이터를 미리 입력값으로 세팅한다
-        if (passedHabit.getId() != 0){
+        if (passedHabit != null){
             habitNameEditText.setText(passedHabit.getHabitName());
             durationEditText.setText(passedHabit.getDuration());
             startsTodaySwitch.setChecked(passedHabit.isStartsTomorrow());

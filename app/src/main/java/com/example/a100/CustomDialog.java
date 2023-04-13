@@ -3,6 +3,8 @@ package com.example.a100;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +24,6 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
     private EditText durationEditText;
     private Switch startsTodaySwitch;
     private EditText countEditText;
-
 
     Habit passedHabit;
 
@@ -46,6 +47,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         this.passedHabit = passedHabit;
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -61,6 +63,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         if (passedHabit != null){
             habitNameEditText.setText(passedHabit.getHabitName());
             durationEditText.setText(passedHabit.getDuration());
+            countEditText.setText(passedHabit.getCount());
             startsTodaySwitch.setChecked(passedHabit.isStartsTomorrow());
         }
 
@@ -70,6 +73,36 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         saveBtn.setOnClickListener(this);
         cancelBtn.setOnClickListener(this);
 
+        // 커스텀 다이얼로그를 처음 띄워서 habitNameEditText 와 durationEditText 모두 값이 비어있다면 saveBtn 을 비활성화 시키고
+        // 습관 수정으로 커스텀 다이얼로그를 사용한 경우는 habitNameEditText 와 durationEditText 가 모두 채워져 있기 때문에, 그런 경우에는 saveBtn 을 처음부터 활성화시킨다
+        if (habitNameEditText.getText().toString().isEmpty() && durationEditText.getText().toString().isEmpty()) {
+            saveBtn.setEnabled(false);
+        }
+
+
+        // 사용자가 습관을 생성하거나 수정할 때 습관의 제목이나 기간 모두 입려되어있어야 saveBtn 을 활성화한다.
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!habitNameEditText.getText().toString().isBlank() && !durationEditText.getText().toString().isBlank()){
+                    saveBtn.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (habitNameEditText.getText().toString().isBlank() || durationEditText.getText().toString().isBlank()){
+                    saveBtn.setEnabled(false);
+                }
+            }
+        };
+
+        habitNameEditText.addTextChangedListener(textWatcher);
+        durationEditText.addTextChangedListener(textWatcher);
 
     }
 
@@ -109,6 +142,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
                     habit.setGoal(passedHabit.getGoal());
                     habit.setDiary(passedHabit.getDiary());
                 }
+
 
                 // 리스너 인터페이스 함수 호출
                 onSaveClickListener.onSaveClicked(habit);

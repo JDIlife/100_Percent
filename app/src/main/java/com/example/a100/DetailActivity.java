@@ -21,6 +21,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -242,7 +244,6 @@ public class DetailActivity extends AppCompatActivity implements CustomDialog.On
                 break;
             }
             case R.id.edit_habit: { // 습관 수정하기
-//                CustomDialog customDialog = new CustomDialog(this, this, habit.getId(), habit.getCreatedDate());
                 CustomDialog customDialog = new CustomDialog(this, this, habit);
                 customDialog.show();
                 break;
@@ -295,6 +296,7 @@ public class DetailActivity extends AppCompatActivity implements CustomDialog.On
         return super.dispatchTouchEvent(ev);
     }
 
+    // CustomDialog 에서 saveBtn 을 눌렀을 때 실행될 리스너
     @Override
     public void onSaveClicked(Habit habit){
 
@@ -309,6 +311,11 @@ public class DetailActivity extends AppCompatActivity implements CustomDialog.On
             }
         }
 
+        // DetailActivity 의 습관제목과 기간을 바로 변경한다
+        TextView subHabitName = findViewById(R.id.sub_habit_name);
+        subHabitName.setText(habit.getHabitName().toString());
+        TextView subDuration = findViewById(R.id.sub_circle_duration);
+        subDuration.setText(habit.getDuration().toString());
 
         HabitUpdateThread habitUpdateThread = new HabitUpdateThread();
         Thread t = new Thread(habitUpdateThread);

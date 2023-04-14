@@ -2,6 +2,7 @@ package com.example.a100;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -27,6 +29,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
 
     Habit passedHabit;
 
+    Context context;
     // listener 인터페이스
     public interface OnSaveClickListener{
         void onSaveClicked(Habit habit);
@@ -45,8 +48,8 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         super(context);
         this.onSaveClickListener = onSaveClickListener;
         this.passedHabit = passedHabit;
+        this.context = context;
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -78,7 +81,6 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
         if (habitNameEditText.getText().toString().isEmpty() && durationEditText.getText().toString().isEmpty()) {
             saveBtn.setEnabled(false);
         }
-
 
         // 사용자가 습관을 생성하거나 수정할 때 습관의 제목이나 기간 모두 입려되어있어야 saveBtn 을 활성화한다.
         TextWatcher textWatcher = new TextWatcher() {
@@ -141,6 +143,7 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
                     habit.setCreatedDate(passedHabit.getCreatedDate());
                     habit.setGoal(passedHabit.getGoal());
                     habit.setDiary(passedHabit.getDiary());
+
                 }
 
 

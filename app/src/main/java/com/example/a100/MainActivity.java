@@ -5,10 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
@@ -68,6 +70,16 @@ public class MainActivity extends AppCompatActivity implements CustomDialog.OnSa
             public void onClick(View v) {
                 CustomDialog customDialog = new CustomDialog(MainActivity.this, MainActivity.this);
                 customDialog.show();
+            }
+        });
+
+        // 사용자 액티비티로 이동하는 이미지 버튼 지정
+        ImageButton userImgBtn = (ImageButton) findViewById(R.id.user_img_btn);
+        userImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, UserActivity.class);
+                startActivity(intent);
             }
         });
 

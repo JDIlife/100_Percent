@@ -11,7 +11,7 @@ import androidx.room.TypeConverters;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Habit.class}, version = 3, exportSchema = false)
+@Database(entities = {Habit.class}, version = 4, exportSchema = false)
 @TypeConverters({StringListTypeConverter.class})
 abstract public class HabitDatabase extends RoomDatabase {
 
@@ -29,7 +29,7 @@ abstract public class HabitDatabase extends RoomDatabase {
                         // TypeConverter 추가
                         .addTypeConverter(new StringListTypeConverter())
                         // 마이그레이션 추가
-                        .addMigrations(MIGRATION_2_3)
+                        .addMigrations(MIGRATION_3_4)
                         .build();
             }
             return INSTANCE;
@@ -37,10 +37,11 @@ abstract public class HabitDatabase extends RoomDatabase {
     }
 
     // 수동 마이그레이션 코드
-    static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+    static final Migration MIGRATION_3_4 = new Migration(3, 4) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE Habit ADD COLUMN diary TEXT");
+            database.execSQL("ALTER TABLE habit ADD COLUMN endDate TEXT");
         }
     };
 }

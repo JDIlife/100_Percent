@@ -2,19 +2,20 @@ package com.example.a100;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -120,17 +121,26 @@ public class CustomDialog extends Dialog  implements View.OnClickListener{
                 habit.setDuration(durationEditText.getText().toString());
                 habit.setStartsTomorrow(startsTodaySwitch.isChecked());
 
-                // 습관 생성일자를 가져옴 (습관을 시작하고 지나간 날짜를 계산하기 위해서)
-                Calendar habitCreatedDate = new GregorianCalendar();
-                long createdDate = habitCreatedDate.getTimeInMillis();
+                // 현재 시간으로 습관 생성일자를 가져옴 (습관을 시작하고 지나간 날짜를 계산하기 위해서)
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+                LocalDate habitCreatedDate = LocalDate.now();
+                String createdDate = habitCreatedDate.format(formatter);
+
+                // 습관 생성일자 저장
                 habit.setCreatedDate(createdDate);
 
-                habit.setCount(countEditText.getText().toString());
+                // ** 습관 생성일자를 기본 체크일자로 저장 (어플 실행시 null 오류 방지)
+                habit.setCheckedDate(createdDate);
 
-                // ** 습관 생성일자를 포멧만 바꿔서 기본 체크일자로 저장 (어플 실행시 null 오류 방지)
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                String checkedDate = dateFormat.format(createdDate);
-                habit.setCheckedDate(checkedDate);
+                // 사용자가 입력한 기간을 처음 습관이 생성된 날짜에 더해서 습관이 종료되는 지점을 저장한다
+                long duration = Long.parseLong(durationEditText.getText().toString());
+                LocalDate habitEndDate = habitCreatedDate.plusDays(duration);
+                String endDate = habitEndDate.format(formatter);
+
+                habit.setEndDate(endDate);
+
+                habit.setCount(countEditText.getText().toString());
 
                 // 나중에 사용자가 습관 상세 페이지에서 입력할 값들이 null 이 되지 않도록 초기화
                 habit.setGoal("");

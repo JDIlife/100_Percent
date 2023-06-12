@@ -24,6 +24,9 @@ import android.widget.TextView;
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -92,7 +95,7 @@ public class DetailActivity extends AppCompatActivity implements CustomDialog.On
         String duration = habit.getDuration();
         boolean startsTomorrow = habit.isStartsTomorrow();
         int didDays = habit.getDidDays();
-        long createdDate = habit.getCreatedDate();
+        String createdDate = habit.getCreatedDate();
 
         // ============== Detail UI 지정 ============//
 
@@ -107,16 +110,13 @@ public class DetailActivity extends AppCompatActivity implements CustomDialog.On
         Button diaryInputBtn = (Button) findViewById(R.id.diary_input_btn);
 
         // 기존에 저장된 습관생성날짜와 현재의 날짜 비교용
-        GregorianCalendar today = new GregorianCalendar();
-        SimpleDateFormat todayDateFormat = new SimpleDateFormat("yyyyMMdd");
-        String todayDate = todayDateFormat.format(today.getTime());
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate ldCreatedDate = LocalDate.parse(createdDate, formatter);
 
         // **습관 생성날짜와 조회날짜를 비교해서 습관을 생성하고 며칠이 지났는지 보여준다
-        // 1.일자를 조회하는 오늘 날짜를 가져온다
-        long nowDate = today.getTimeInMillis();
-        // 2.처음 습관을 생성했던 날짜와 차이를 계산해서 지나간 날짜를 얻는다
-        long diffSec = (nowDate - createdDate) / 1000;
-        long passedDate = diffSec / (24*60*60);
+        long passedDate = ChronoUnit.DAYS.between(ldCreatedDate, today);
 
         circleDuration.setText(duration);
         circlePassedDate.setText(String.valueOf(passedDate));
@@ -194,7 +194,7 @@ public class DetailActivity extends AppCompatActivity implements CustomDialog.On
         });
     }
 
-    // menu 를 그려준다
+    // toolbar menu 를 그려준다
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater menuInflater = getMenuInflater();

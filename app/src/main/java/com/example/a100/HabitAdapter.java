@@ -10,6 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -65,16 +68,19 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         TextView progressTextView = listItemView.findViewById(R.id.habit_progress);
 
         // 기존에 저장된 습관생성날짜와 현재의 날짜 비교용
-        GregorianCalendar today = new GregorianCalendar();
-        SimpleDateFormat todayDateFormat = new SimpleDateFormat("yyyyMMdd");
-        String todayDate = todayDateFormat.format(today.getTime());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate today = LocalDate.now(); // 오늘 날짜 가져옴
+        String todayCheckedDate = today.format(formatter);
+        String habitCheckedDate = currentHabit.getCheckedDate(); // String "2023-06-09" 같은 형식의 날짜 반환
+        LocalDate checkedDate = LocalDate.parse(habitCheckedDate, formatter); // LocalDate 타입의 날짜 반환
 
         // ============ 습관 제목, 횟수 설정 부분 ============== //
 
         // ===== 습관 제목, 횟수 표시
-        if(currentHabit.getCheckedDate().equals(todayDate)){
+        if(checkedDate.equals(today)){
             nameTextView.setText(currentHabit.getHabitName() + "    " + currentHabit.getDoCount() + "/" + currentHabit.getCount());
-        } else if(!(currentHabit.getCheckedDate().equals(todayDate))){ // 습관을 마지막으로 체크한 날짜와 어플을 켰을 때 날짜가 다르면 0으로 초기화
+        } else if(!(checkedDate.equals(today))){ // 습관을 마지막으로 체크한 날짜와 어플을 켰을 때 날짜가 다르면 0으로 초기화
             nameTextView.setText(currentHabit.getHabitName() + "    " + "0/" + currentHabit.getCount());
             currentHabit.setDoCountZero();
 
@@ -88,18 +94,20 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
 
         // ====== 원 부분 습관 지나간 기간 표시
         // **습관 생성날짜와 조회날짜를 비교해서 습관을 생성하고 며칠이 지났는지 보여준다
-            // 1.일자를 조회하는 오늘 날짜를 가져온다
-        long nowDate = today.getTimeInMillis();
-            // 2.처음 습관을 생성했던 날짜와 차이를 계산해서 지나간 날짜를 얻는다
-        long diffSec = (nowDate - currentHabit.getCreatedDate()) / 1000;
-        long passedDate = diffSec / (24*60*60);
+            // 처음 습관을 만들었던 날짜를 가져와서 오늘과의 차이를 계산한다
+        String habitCreatedDate = currentHabit.getCreatedDate();
+        LocalDate createdDate = LocalDate.parse(habitCreatedDate, formatter);
+
+        long passedDate = ChronoUnit.DAYS.between(createdDate, today);
+
+        // 내일부터 옵션을 켰다면, 습관 생성일이 +1 되기 때문에 습관 생성 당일날 passedDate 는 -1이 나온다
 
         // ======  습관 진행 바 내용
         // 처음 습관을 만들었을 때 기본값을 보여준다
         int didDays = currentHabit.getDidDays();
 
         if(currentHabit.isStartsTomorrow()){ // 습관을 내일부터 시작한 경우
-            if(passedDate != 0){
+            if(passedDate != 0){ // 내일부터 시작한 습관이 날짜가 다음날로 넘어간 경우
                 int doPercent = (int) ((didDays / (float)passedDate) * 100);
                 progressTextView.setText(passedDate + "일 중 " + didDays + "일 달성    " + doPercent +"%");
                 circlePassedDate.setText(String.valueOf(passedDate));
@@ -115,7 +123,7 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
         }
 
         // ===== 습관 체크버튼 활성화/비활성화 여부 (횟수를 모두 채우고, 동일한 날짜라면 체크버튼 비활성화)
-        if((currentHabit.getDoCount() == Integer.valueOf(currentHabit.getCount())) && (currentHabit.getCheckedDate().equals(todayDate))){
+        if((currentHabit.getDoCount() == Integer.valueOf(currentHabit.getCount())) && (checkedDate.equals(today))){
             chkBtn.setEnabled(false);
         }
 
@@ -126,10 +134,7 @@ public class HabitAdapter extends ArrayAdapter<Habit> {
 
             public void onClick(View v){
                 // ** 체크버튼을 클릭한 날짜를 기록함
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                GregorianCalendar checkedMoment = new GregorianCalendar();
-                String checkedDate = dateFormat.format(checkedMoment.getTime());
-                currentHabit.setCheckedDate(checkedDate);
+                currentHabit.setCheckedDate(todayCheckedDate);
 
                 //습관의 횟수보다 적을 때만 버튼을 클릭하면 doCount 증가, 습관 횟수를 모두 채웠으면 chkBtn 비활성화
                 if(doCount < (totalCount - 1)){

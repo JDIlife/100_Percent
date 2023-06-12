@@ -28,10 +28,11 @@ public class Habit implements Parcelable {
     private String habitName;
     private String duration;
     private boolean startsTomorrow;
-    private long createdDate;
+    private String createdDate;
     private int didDays;
     private String count;
     private String checkedDate;
+    private String endDate;
     private int doCount;
 
     private String goal;
@@ -56,14 +57,14 @@ public class Habit implements Parcelable {
         // writeBoolean 은 최소 sdk 요구가 29 버전이라서 사용하려면 minsdk를 29로 올리거나, boolean을 int형태로 변환해서 저장하는 방법이 있는데
         // 하위 호환을 위해 후자의 방법을 선택했다
         dest.writeInt(startsTomorrow ? 1: 0);
-        dest.writeLong(createdDate);
+        dest.writeString(createdDate);
         dest.writeInt(didDays);
         dest.writeString(count);
         dest.writeString(checkedDate);
+        dest.writeString(endDate);
         dest.writeInt(doCount);
         dest.writeString(goal);
         dest.writeStringList(diary);
-        // 여기서는 diary size=2로 null 이 아니다. 디버거를 확인하니, 내용도 정상적으로 들어있다!
     }
     // 역직렬화용 생성자
     protected Habit(Parcel in) {
@@ -71,10 +72,11 @@ public class Habit implements Parcelable {
         habitName = in.readString();
         duration = in.readString();
         startsTomorrow = in.readByte() != 0;
-        createdDate = in.readLong();
+        createdDate = in.readString();
         didDays = in.readInt();
         count = in.readString();
         checkedDate = in.readString();
+        endDate = in.readString();
         doCount = in.readInt();
         goal = in.readString();
 
@@ -131,11 +133,11 @@ public class Habit implements Parcelable {
         this.startsTomorrow = startsTomorrow;
     }
 
-    public long getCreatedDate() {
+    public String getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(long createdDate) {
+    public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -165,6 +167,14 @@ public class Habit implements Parcelable {
 
     public void setCheckedDate(String checkedDate) {
         this.checkedDate = checkedDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 
     public int getDoCount() {
